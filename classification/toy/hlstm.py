@@ -12,12 +12,11 @@ BasicLSTMCell = tf.nn.rnn_cell.BasicLSTMCell
 
 
 class HLSTM(object):
-    def __init__(self, vocab, max_sent_len, max_doc_len, hidden_state_dim=10, batch_size=2, embedding_dim=6, num_classes=2, learning_rate=0.01, checkpoint_dir="checkpoint"):
+    def __init__(self, vocab_size, max_sent_len, max_doc_len, hidden_state_dim=10, batch_size=10, embedding_dim=6, num_classes=2, learning_rate=0.01, checkpoint_dir="checkpoint"):
         self.hidden_state_dim     = hidden_state_dim
         self.batch_size     = batch_size
         self.embedding_dim  = embedding_dim
-        self.vocab          = vocab
-        self.vocab_size     = len(vocab)+1
+        self.vocab_size     = vocab_size
         self.max_sent_len   = max_sent_len
         self.max_doc_len    = max_doc_len
         self.checkpoint_dir = checkpoint_dir
@@ -88,7 +87,7 @@ class HLSTM(object):
         return False 
 
     def build_data(self, num_docs):
-        inputs,outputs = datagen.generate_data(100,max_sent=self.max_doc_len, max_sent_len=self.max_sent_len)
+        inputs,outputs = datagen.generate_data(num_docs,max_sent=self.max_doc_len, max_sent_len=self.max_sent_len)
         tokens = {"A":1,"B":2,"C":3,"D":4,"E":5}
         
         docs = []
@@ -101,7 +100,6 @@ class HLSTM(object):
             if len(doc) > 0: docs.append(doc + [[0]*self.max_sent_len]*(self.max_doc_len-len(doc)))
             labels.append([1,0] if outputs[0] == 1 else [0,1])
 
-        self.dataset = {"data":docs, "targets":labels}
         return docs,labels
 
     def get_batch(self, dataset, offset, size):
@@ -131,6 +129,16 @@ class HLSTM(object):
                 #    self.save(sess)
 
             print("Optimization Finished!")
+            steps = len(self.testset['data'])//self.batch_size
+            offset = 0
+            for step in range(steps):
+                batch_x, batch_y = self.get_batch(self.testset,offset,self.batch_size)
+                batch_x, batch_y = np.array(batch_x), np.array(batch_y)
+                acc, loss = sess.run([self.accuracy, self.cost], feed_dict={self.input_data: batch_x, self.output_data: batch_y})
+                print("Step " + str(step) + ", Minibatch Loss= " + "{:.6f}".format(loss) + ", Test Accuracy= " + "{:.5f}".format(acc))
+                offset += self.batch_size
+                if offset+self.batch_size > len(self.testset['data']):
+                    break
             # test_data,test_label = get_batch(testset,0,len(testset.data))
             # test_data = test_data.reshape((len(testset.data), timesteps, embedding_dim))
             # print("Testing Accuracy:", sess.run(accuracy, feed_dict={x: test_data, y: test_label}))
@@ -138,10 +146,14 @@ class HLSTM(object):
     
     def run(self):
         print("Building dataset")
-        self.build_data(100)
+        docs,labels = self.build_data(10)
+        self.dataset = {"data":docs, "targets":labels}
+        docs,labels = self.build_data(100)
+        self.testset = {"data":docs, "targets":labels}
+        
         print("Building model")
         self.build_model()
         print("Training")
         self.train()
 
-HLSTM(["A","B","C","D","E"],20,10)
+HLSTM(6,10,25)
