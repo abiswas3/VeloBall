@@ -37,9 +37,14 @@ def split_and_tokenise_doc(raw_doc):
 
 x = tf.placeholder(tf.int64, shape=[batch_size, max_document_len, max_sentence_len, word_embedding_dim])
 y = tf.placeholder(tf.int32, [batch_size, num_classes])
-sentence_lens = tf.placeholder(tf.int32, [batch_size, max_document_len])
-document_lens = tf.placeholder(tf.int32, [batch_size])
 dropout_keep_prob = tf.placeholder(tf.float32)
+
+num_layers = 2
+layers = [BasicLSTMCell(num_hidden) for i in range(num_layers)]
+
+
+
+
 
 # Outputs a tensor of size [batch_size, output_dim] I think?
 def LSTM(input_x, seqlens, hidden_dim, output_dim):
