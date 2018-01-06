@@ -5,7 +5,7 @@ import sys, re, random
 sys.path.append("../")
 import newsgroups
 from IPython import embed
-
+[
 learning_rate = 0.001
 batch_size = 256
 display_step = 200

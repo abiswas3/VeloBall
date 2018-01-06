@@ -7,12 +7,26 @@ import os
 import create_synthetic_data as datagen
 import random
 from IPython import embed
+import sys
+sys.path.append('../')
+
+import newsgroups
 
 BasicLSTMCell = tf.nn.rnn_cell.BasicLSTMCell
 
 
 class HLSTM(object):
-    def __init__(self, vocab_size, max_sent_len, max_doc_len, hidden_state_dim=10, batch_size=10, embedding_dim=6, num_classes=2, learning_rate=0.01, checkpoint_dir="checkpoint"):
+    def __init__(self,
+                 vocab_size,
+                 max_sent_len,
+                 max_doc_len,                 
+                 hidden_state_dim=16,
+                 batch_size=50,
+                 embedding_dim=16,
+                 num_classes=3,
+                 learning_rate=0.1,
+                 checkpoint_dir="checkpoint"):
+        
         self.hidden_state_dim     = hidden_state_dim
         self.batch_size     = batch_size
         self.embedding_dim  = embedding_dim
@@ -87,9 +101,14 @@ class HLSTM(object):
         return False 
 
     def build_data(self, num_docs):
-        inputs,outputs = datagen.generate_data(num_docs,max_sent=self.max_doc_len, max_sent_len=self.max_sent_len)
-        tokens = {"A":1,"B":2,"C":3,"D":4,"E":5}
         
+        inputs, outputs = datagen.generate_data(num_docs,
+                                                max_sent=self.max_doc_len,
+                                                min_sent=5,
+                                                max_sent_len=self.max_sent_len,
+                                                min_sent_len=5)
+
+        tokens = {"A":1,"B":2,"C":3,"D":4,"E":5}        
         docs = []
         labels = []
         
@@ -100,12 +119,19 @@ class HLSTM(object):
             if len(doc) > 0: docs.append(doc + [[0]*self.max_sent_len]*(self.max_doc_len-len(doc)))
             labels.append([1,0] if outputs[0] == 1 else [0,1])
 
+
+        # print(docs)
+        # print(len(docs), len(docs[0]), len(docs[0][0]))
+        print(labels)
         return docs,labels
 
     def get_batch(self, dataset, offset, size):
         return dataset['data'][offset:offset+size],dataset['targets'][offset:offset+size]
     
-    def train(self, epochs=100, save_iters=10):
+    def train(self,
+              epochs=1000,
+              save_iters=10):
+        
         with tf.Session() as sess:
             sess.run(tf.initialize_all_variables())
         
@@ -145,15 +171,131 @@ class HLSTM(object):
 
     
     def run(self):
+
         print("Building dataset")
-        docs,labels = self.build_data(10)
-        self.dataset = {"data":docs, "targets":labels}
-        docs,labels = self.build_data(100)
-        self.testset = {"data":docs, "targets":labels}
+        # Need to replace this with my function: docs is already good
+        # need to make labels softmax
+        # docs,labels = self.build_data(10)
+
+        num_train = int(len(DATA)*0.8)
+        self.dataset = {"data":DATA[:num_train,:,:], "targets":output_class[:num_train, :]}
         
+        # Given it a test set as well
+        # docs,labels = self.build_data(100)
+        # self.testset = {"data":docs, "targets":labels}
+        self.testset = {"data":DATA[num_train:,:,:], "targets":output_class[num_train:, :]}        
         print("Building model")
         self.build_model()
         print("Training")
-        self.train()
+        self.train(epochs=1000)
 
-HLSTM(6,10,25)
+
+if __name__ == '__main__':
+
+    trainset = newsgroups.newsgroups_train
+    testset = newsgroups.newsgroups_test
+    vocab = {k:v+1 for k,v in zip(newsgroups.vocab, newsgroups.vocab.values())} # free up the 0 index
+    rev_vocab = {v:k for k,v in zip(vocab, vocab.values())}
+    vocab_size = len(vocab)
+    print("Vocab size: ", len(vocab))
+
+    ####################################
+    # UNTIDY PREPROCESS TO BE CLEANED LATER
+    ####################################
+    news_articles = []
+    for i in trainset['data']:
+        temp = i.split('\n')[1:] # removing from information
+        temp = [i.strip().split() for i in temp if len(i) > 0]
+        news_articles.append(temp)
+        
+    docs = []
+    for d in news_articles:
+        doc = []
+        for s in d:
+            # minimum number of vocabulary words that has to be there in a sentence for it be included
+            min_sen_len = max(len(s)//2, 1) 
+            wcount=0
+            for w in s:
+                if w in vocab:
+                    wcount +=1
+                    
+            # this sentence is not rubbish: use it
+            if wcount > min_sen_len:
+                doc.append(s)
+            
+        if len(doc) > 0:
+            docs.append(doc) 
+            
+    news_articles = docs[:]
+
+    MAX_DOC_LEN = 20 # throw away the rest :( 
+    MIN_DOC_LEN = 10
+
+    MAX_SEN_LEN = 15
+    MIN_SEN_LEN = 6
+
+    docs = []
+    labels = []
+    fucK_count = 0
+    for index,doc in enumerate(news_articles):            
+        
+        # Document too small- don't care
+        if len(doc) < MIN_DOC_LEN:
+            continue
+            
+        new_doc = []    
+        for num_sen, sent in enumerate(doc):
+            
+            # Sentence too small ignore
+            if len(sent) < MIN_SEN_LEN:
+                continue
+                    
+            nm_pad = MAX_SEN_LEN - len(sent)
+            if nm_pad > 0:
+                sent = [vocab[word] if word in vocab else 0 for word in sent] + [0 for i in range(nm_pad)]
+            else:
+                sent = [vocab[word] if word in vocab else 0 for word in sent[:MAX_SEN_LEN]]
+                
+            new_doc.append(sent)
+            
+        num_pad = 0 if len(new_doc) > MAX_DOC_LEN else MAX_DOC_LEN - len(new_doc)        
+        # 0 pad those empty documents
+        
+        if num_pad > 0:
+            for i in range(num_pad):
+                new_doc.append([0 for k in range(MAX_SEN_LEN)])
+                
+        new_doc = np.array(new_doc[:MAX_DOC_LEN])    
+        # small check
+        if new_doc.shape[0] != MAX_DOC_LEN or new_doc.shape[1] != MAX_SEN_LEN :
+            fucK_count += 1
+            print("Old index: ", index, "New index: ", len(docs))
+            print(new_doc.shape)
+            print()
+        
+        docs.append(new_doc)    
+        labels.append(trainset.target[index])
+
+        
+    news_articles = docs[:]
+    labels = np.array(labels)
+
+    ####################################
+    # SHAPE INTO STYLE I NEED
+    ####################################
+    DATA = np.zeros((len(news_articles), MAX_DOC_LEN, MAX_SEN_LEN), dtype=int)
+    for i in range(len(news_articles)):
+        assert news_articles[i].shape[0] == MAX_DOC_LEN
+        assert news_articles[i].shape[1] == MAX_SEN_LEN    
+        DATA[i] = news_articles[i]
+
+    output_class = np.zeros((DATA.shape[0], len(np.unique(labels))))
+    for i in range(len(output_class)):
+        output_class[i, labels[i]] = 1
+        
+    print(DATA.shape)
+    print(output_class.shape)    
+    
+    HLSTM(vocab_size,
+          MAX_SEN_LEN,
+          MAX_DOC_LEN)
