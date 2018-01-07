@@ -61,29 +61,40 @@ class HLSTM(object):
         print("IL",len(self.inputs))
         with tf.variable_scope("encode_RNN_word"):
             for s in range(self.max_doc_len):
-                word_outputs, word_states = tf.nn.dynamic_rnn(cell=self.encode_word_cell, dtype=tf.float32, sequence_length=self.input_sent_lens[:,s], inputs=self.inputs[s])
+                word_outputs, word_states = tf.nn.dynamic_rnn(cell=self.encode_word_cell,
+                                                              dtype=tf.float32,
+                                                              sequence_length=self.input_sent_lens[:,s],
+                                                              inputs=self.inputs[s])
+                
                 sent_encodings.append(word_outputs[:,-1,:])
 
         with tf.variable_scope("encode_RNN_sentence"):
             sent_encodings = tf.stack(sent_encodings,axis=1)
             print("SES",sent_encodings.shape)
-            doc_outputs, doc_states = tf.nn.dynamic_rnn(cell=self.encode_sent_cell, dtype=tf.float32, sequence_length=self.input_doc_lens, inputs=sent_encodings)
+            doc_outputs, doc_states = tf.nn.dynamic_rnn(cell=self.encode_sent_cell,
+                                                        dtype=tf.float32,
+                                                        sequence_length=self.input_doc_lens,
+                                                        inputs=sent_encodings)
         doc_encoding = doc_outputs[:,-1,:]
 
         self.result = tf.matmul(doc_encoding, self.weights) + self.biases
         print(doc_encoding.shape,self.result.shape)
         
-        self.cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=self.result, labels=self.output_data))
-        self.optimizer = tf.train.GradientDescentOptimizer(learning_rate=self.learning_rate).minimize(self.cost)
+        self.cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=self.result,
+                                                                           labels=self.output_data)
+                                   
+        self.optimizer = tf.train.GradientDescentOptimizer(
+            learning_rate=self.learning_rate).minimize(self.cost)
+                                   
         self.correct_pred = tf.equal(tf.argmax(self.result,1), tf.argmax(self.output_data,1))
         self.accuracy = tf.reduce_mean(tf.cast(self.correct_pred, tf.float32))
 
     def get_batch(self, dataset, offset, size):
-        return dataset['data'][offset:offset+size],\
-            dataset['targets'][offset:offset+size],\
-            dataset['doc_lens'][offset:offset+size],\
-            dataset['sent_lens'][offset:offset+size]
-    
+        return dataset['data'][offset:offset+size],                                   
+                                   dataset['targets'][offset:offset+size],
+                                   dataset['doc_lens'][offset:offset+size],
+                                   dataset['sent_lens'][offset:offset+size]
+                                   
     def train(self, epochs=1000):
         
         with tf.Session() as sess:
@@ -105,10 +116,13 @@ class HLSTM(object):
                                                     self.output_data: batch_y,
                                                     self.input_sent_lens: batch_s,
                                                     self.input_doc_lens: batch_d})
-                acc, loss = sess.run([self.accuracy, self.cost], feed_dict={self.input_data: batch_x,
-                                                                            self.output_data: batch_y,
-                                                                            self.input_sent_lens: batch_s,
-                                                                            self.input_doc_lens: batch_d})
+                acc, loss = sess.run([self.accuracy,
+                                      self.cost],
+                                     feed_dict={self.input_data: batch_x,
+                                                self.output_data: batch_y,
+                                                self.input_sent_lens: batch_s,
+                                                self.input_doc_lens: batch_d})
+                                   
                 print("Step " + str(step) + ", Minibatch Loss= " + "{:.6f}".format(loss) + ", Training Accuracy= " + "{:.5f}".format(acc))
                 offset += self.batch_size
                 if offset+self.batch_size > len(trainset['data']):
