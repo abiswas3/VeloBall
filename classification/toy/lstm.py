@@ -64,7 +64,8 @@ class HLSTM(object):
         self.result = tf.matmul(doc_encoding, self.weights) + self.biases
         print("DS",doc_encoding.shape,self.result.shape)
         
-        self.cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=self.result, labels=self.output_data))
+        self.cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=self.result,
+                                                                           labels=self.output_data))
         self.optimizer = tf.train.GradientDescentOptimizer(learning_rate=self.learning_rate).minimize(self.cost)
         #self.grads = self.optimizer.compute_gradients(cost)
         self.correct_pred = tf.equal(tf.argmax(self.result,1), tf.argmax(self.output_data,1))
