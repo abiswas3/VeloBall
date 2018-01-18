@@ -5,11 +5,14 @@ nltk.download('punkt')
 from nltk.tokenize import sent_tokenize, word_tokenize
 
 def parse_document_into_sentences(x,
-                                  min_words_in_sent=1,
+                                  min_words_in_sent=5,
                                   max_words_in_sent=10,
                                   min_sents_in_doc=1,
-                                  max_sents_in_doc=10):
-    
+                                  max_sents_in_doc=20):
+
+    '''
+    x : document
+    '''
     sentences = sent_tokenize(x)
     document = []
     for s in sentences:

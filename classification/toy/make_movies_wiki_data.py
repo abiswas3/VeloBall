@@ -31,4 +31,4 @@ for fName in files:
     print()
 
 summaries = [i for i in summaries if i != None]
-np.save('wiki_data/movies/all_movies_big', summaries)
+# np.save('wiki_data/movies/all_movies_big', summaries)
