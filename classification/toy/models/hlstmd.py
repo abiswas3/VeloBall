@@ -14,15 +14,17 @@ import newsgroups
 
 LSTMCell = tf.nn.rnn_cell.BasicLSTMCell
 
+
 class HLSTM(object):
+    
     def __init__(self,
                  vocab_size,
                  max_sent_len,
-                 max_doc_len,                 
+                 max_doc_len,
+                 num_classes,                 
                  hidden_state_dim=40,
                  batch_size=50,
                  embedding_dim=32,
-                 num_classes=3,
                  learning_rate=0.1,
                  checkpoint_dir="checkpoint"):
         
@@ -36,6 +38,7 @@ class HLSTM(object):
         self.num_classes    = num_classes
         self.learning_rate  = learning_rate
         self.run()
+        
 
     def build_model(self):
         self.input_data  = tf.placeholder(tf.int32, [self.batch_size, self.max_doc_len, self.max_sent_len])
@@ -81,7 +84,7 @@ class HLSTM(object):
         print(doc_encoding.shape,self.result.shape)
         
         self.cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=self.result,
-                                                                           labels=self.output_data)
+                                                                           labels=self.output_data))
                                    
         self.optimizer = tf.train.GradientDescentOptimizer(
             learning_rate=self.learning_rate).minimize(self.cost)
@@ -90,10 +93,8 @@ class HLSTM(object):
         self.accuracy = tf.reduce_mean(tf.cast(self.correct_pred, tf.float32))
 
     def get_batch(self, dataset, offset, size):
-        return dataset['data'][offset:offset+size],                                   
-                                   dataset['targets'][offset:offset+size],
-                                   dataset['doc_lens'][offset:offset+size],
-                                   dataset['sent_lens'][offset:offset+size]
+        
+        return dataset['data'][offset:offset+size], dataset['targets'][offset:offset+size], dataset['doc_lens'][offset:offset+size], dataset['sent_lens'][offset:offset+size]
                                    
     def train(self, epochs=1000):
         
@@ -102,20 +103,15 @@ class HLSTM(object):
         
             trainset = self.dataset
             offset = 0
-            for step in range(epochs):
+            for step in range(epochs):                
                 batch_x, batch_y, batch_d, batch_s = self.get_batch(trainset,offset,self.batch_size)
                 batch_x, batch_y, batch_d, batch_s = np.array(batch_x), np.array(batch_y), np.array(batch_d), np.array(batch_s)
-                # batch_x = ((doc0_word0,doc0_word1,doc0_word2,...),...,(docB_word0,docB_word1,docB_word2,...))
-                # batch_y = ((doc0_is_class0,,doc0_is_class1,doc0_is_class2),...,(docB_is_class0,,docB_is_class1,docB_is_class2))
-                # batch_s = (doc0_len,...,docB_len)
-                # print("X",batch_x[-1],batch_x[0].shape,batch_x.shape)
-                # print("Y",batch_y[-1],batch_y[0].shape,batch_y.shape)
-                # print("D",batch_d[-1],batch_d[0].shape,batch_d.shape)
-                # print("S",batch_s[-1],batch_s[0].shape,batch_s.shape)
-                sess.run(self.optimizer, feed_dict={self.input_data: batch_x,
+                                   
+                sess.run(self.optimizer, feed_dict={self.input_data: batch_x,                                                    
                                                     self.output_data: batch_y,
                                                     self.input_sent_lens: batch_s,
                                                     self.input_doc_lens: batch_d})
+                                   
                 acc, loss = sess.run([self.accuracy,
                                       self.cost],
                                      feed_dict={self.input_data: batch_x,
@@ -131,24 +127,7 @@ class HLSTM(object):
                 #    self.save(sess)
 
             print("Optimization Finished!")
-            # steps = len(self.testset['data'])//self.batch_size
-            # offset = 0
-            # for step in range(steps):
-            #     batch_x, batch_y = self.get_batch(self.testset,offset,self.batch_size)
-            #     batch_x, batch_y = np.array(batch_x), np.array(batch_y)
-            #     acc, loss = sess.run([self.accuracy, self.cost], feed_dict={self.input_data: batch_x,
-            #                                                                 self.output_data: batch_y,
-            #                                                                 self.input_sent_lens = batch_s,
-            #                                                                 self.input_doc_lens = batch_d
-
-            #     })
-            #     print("Step " + str(step) + ", Minibatch Loss= " + "{:.6f}".format(loss) + ", Test Accuracy= " + "{:.5f}".format(acc))
-            #     offset += self.batch_size
-            #     if offset+self.batch_size > len(self.testset['data']):
-            #         break
-            # test_data,test_label = get_batch(testset,0,len(testset.data))
-            # test_data = test_data.reshape((len(testset.data), timesteps, embedding_dim))
-            # print("Testing Accuracy:", sess.run(accuracy, feed_dict={x: test_data, y: test_label}))
+                                   
 
     
     def run(self):
@@ -174,17 +153,22 @@ class HLSTM(object):
         self.train(epochs=1000)
 
 
-vocab = newsgroups.vocab
-DATA = np.array(newsgroups.docs)
-LABELS = np.array(newsgroups.labels)
-DOC_LENS = np.array(newsgroups.doc_lens)
-SENT_LENS = np.array(newsgroups.sent_lens)
+# vocab = newsgroups.vocab
+# DATA = np.array(newsgroups.docs)
+# LABELS = np.array(newsgroups.labels)
+# DOC_LENS = np.array(newsgroups.doc_lens)
+# SENT_LENS = np.array(newsgroups.sent_lens)
 
-print(DATA.shape, LABELS.shape, DOC_LENS.shape, SENT_LENS.shape)
+# print(DATA.shape, LABELS.shape, DOC_LENS.shape, SENT_LENS.shape)
 
-#embed()
+# #embed()
 
-print("Vocab size: ", len(vocab))
-print("Data shape: ", DATA.shape)
+# print("Vocab size: ", len(vocab))
+# print("Data shape: ", DATA.shape)
 
-HLSTM(len(vocab), 25, 20)
+# HLSTM(len(vocab), 25, 20)
+if __name__ == '__main__':
+    print('messi')                                   
+
+                                   
+
