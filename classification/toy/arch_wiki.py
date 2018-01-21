@@ -1,5 +1,5 @@
 import wikipedia as w
-
+import json
 from preprocess_for_lstm import parse_document_into_sentences
 
 def get_search_terms(query):
@@ -28,7 +28,7 @@ if __name__ == '__main__':
         queries = get_search_terms(lq)
         
         for qNum, query in enumerate(queries):
-            print(query)
+            print(qNum, query)
             data = get_wiki_page(query)
             if data != None:
                 # migt want to subsample here or do other things
@@ -38,6 +38,10 @@ if __name__ == '__main__':
                 DOCUMENTS[query]['data'] = x
                 DOCUMENTS[query]['label'] = index
 
-            print(qNum)
+
 
         print()
+
+
+    with open('bollox', 'w') as f:
+        json.dump(DOCUMENTS, f)

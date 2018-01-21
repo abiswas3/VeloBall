@@ -35,7 +35,7 @@ def parse_document_into_sentences(x,
             document += [['UNK' for i in range(max_words_in_sent)]
                          for i in range(max_sents_in_doc - len(document))]
             
-        return np.array(document[:max_words_in_sent])
+        return document[:max_words_in_sent]
     else:
         return None
 
