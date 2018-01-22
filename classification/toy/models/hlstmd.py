@@ -213,25 +213,26 @@ if __name__ == '__main__':
             forward_dict[word] = 0
 
             
-    DATA = []
-    SENT_LENS = []
-    DOC_LENS = []
+    DATA = np.zeros((len(lst), max_doc_len, max_sent_len))
+    SENT_LENS = np.zeros((len(lst), max_doc_len))
+    DOC_LENS = np.zeros(len(lst))
     LABELS = np.zeros((len(lst), 3))
     ind = 0
     for key in list(x.keys()):
         document = x[key]['data']        
         if document != None:
             data, sCount, num_sents = tokenized(document, forward_dict)
-            DATA.append(DATA)
-            SENT_LENS.append(sCount)
-            DOC_LENS.append(num_sents)
+            DATA[ind, :, :] = data
+            SENT_LENS[ind, :] = sCount
+            DOC_LENS[ind] = num_sents
             lab  = x[key]['label']
             LABELS[ind, lab] = 1
             ind +=1
 
+            
     DATA = np.array(DATA)
     num_docs = len(DATA)
-    
+    print('DATA preprocessed')
     ####################################################################
     h = HLSTM(vocab_size,
               max_sent_len,

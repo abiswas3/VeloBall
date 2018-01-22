@@ -3,7 +3,6 @@ import nltk
 nltk.download('punkt')
 import sys
 sys.path.append('../../')
-from FeatureExtractionTools.bagOfWordsTfIdf import train, get_features, idf
 
 from nltk.tokenize import sent_tokenize, word_tokenize
 import json
@@ -76,6 +75,7 @@ def tokenized(document, d):
         sCount.append(j)
         doc.append(sent)
 
+    sCount = np.array(sCount)
     return np.array(doc), sCount, num_sents
 
 if __name__ == '__main__':
