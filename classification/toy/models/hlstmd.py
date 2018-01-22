@@ -6,6 +6,9 @@ import os
 import create_synthetic_data as datagen
 import random
 from IPython import embed
+import json
+from collections import Counter
+from preprocess_for_lstm import tokenized, naive_corpus
 
 LSTMCell = tf.nn.rnn_cell.BasicLSTMCell
 
@@ -160,25 +163,76 @@ if __name__ == '__main__':
     ######################## WHAT THE USER SPECIFIES  #####################
 
     # Currently rubbish
-    vocab_size = 1000
+    # vocab_size = 1000
+    # max_sent_len = 10
+    # max_doc_len  = 10
+    # num_classes = 3
+
+    # num_docs = 1000
+    # DATA = np.random.randint(0, high=vocab_size, size=(num_docs, max_doc_len, max_sent_len))
+    # LABELS = np.zeros((num_docs, num_classes))
+    # for i in range(len(LABELS)):
+    #     c = np.random.randint(0, high=3)
+    #     LABELS[c] = 1
+
+    # # So all documents have 10 sentences
+    # # Each sentences have variable number of words
+    # SENT_LENS = np.array([[np.random.randint(0,high=max_sent_len) for j in range(max_doc_len)] for i in range(num_docs)])
+    # DOC_LENS = np.array([max_doc_len for i in range(num_docs)])
+
+    #####################################################################
+
+
+    x = json.load(open('../bollox'))
+    
+    lst = []
+    for key in list(x.keys()):
+        document = x[key]['data']
+        if document != None:
+            flattened_doc = [j for i in document for j in i]
+            lst.append(Counter(flattened_doc))
+
+
+    all_words = naive_corpus([j for i in lst for j in i])
+    
+    vocab = [i for i,j in all_words[:5000]]
+    vocab_size = len(vocab)
+
     max_sent_len = 10
     max_doc_len  = 10
     num_classes = 3
 
-    num_docs = 1000
-    DATA = np.random.randint(0, high=vocab_size, size=(num_docs, max_doc_len, max_sent_len))
-    LABELS = np.zeros((num_docs, num_classes))
-    for i in range(len(LABELS)):
-        c = np.random.randint(0, high=3)
-        LABELS[c] = 1
-
-    # So all documents have 10 sentences
-    # Each sentences have variable number of words
-    SENT_LENS = np.array([[np.random.randint(0,high=max_sent_len) for j in range(max_doc_len)] for i in range(num_docs)])
-    DOC_LENS = np.array([max_doc_len for i in range(num_docs)])
-
-    #####################################################################
     
+    forward_dict = {w:i+1 for i,w in enumerate(vocab) if w != 'UNK'}
+    reverse_dict = {i+1:w for i,w in enumerate(vocab) if w != 'UNK'}
+    forward_dict['UNK'] = 0
+    reverse_dict[0] = 'UNK'
+    
+    for word, count in all_words:
+        if word not in forward_dict:
+            forward_dict[word] = 0
+
+            
+    DATA = []
+    SENT_LENS = []
+    DOC_LENS = []
+    LABELS = np.zeros((len(lst), 3))
+    ind = 0
+    for key in list(x.keys()):
+        document = x[key]['data']        
+        if document != None:
+            data, sCount, num_sents = tokenized(document, forward_dict)
+            DATA.append(DATA)
+            SENT_LENS.append(sCount)
+            DOC_LENS.append(num_sents)
+            lab  = x[key]['label']
+            LABELS[ind, lab] = 1
+            ind +=1
+
+    DATA = np.array(DATA)
+    num_docs = len(DATA)
+    
+    ####################################################################
     h = HLSTM(vocab_size,
               max_sent_len,
               max_doc_len,

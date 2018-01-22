@@ -8,6 +8,16 @@ score instead of 1
 '''
 
 
+def idf(term, N, doc_word_counts):
+
+
+    idf = 0
+    for doc in doc_word_counts:
+        if term in doc:
+            idf +=1
+
+    return np.log(N/idf)  # basic version
+
 def train(document_list, stop_words='english'):
 
 
@@ -15,9 +25,9 @@ def train(document_list, stop_words='english'):
         count_vectorizer = CountVectorizer(stop_words=stop_words)
     else:
         count_vectorizer = CountVectorizer()
-        
+
     count_vectorizer.fit_transform(document_list)
-    
+
     return count_vectorizer
 
 def get_features(count_vectorizer, document_list):
@@ -26,12 +36,12 @@ def get_features(count_vectorizer, document_list):
     # using words in count_vectorizer
     freq_term_matrix = count_vectorizer.transform(document_list)
 
-    
+
     # rewweight the words based on occurrence across documents
     # tf(t,d): times term t ocurs in document t
     # idf(t) : times term occures in all documents
     # tf-idf(t,d) : tf(t,d)*idf(t)
-    
+
     tfidf = TfidfTransformer(norm="l2")
     tfidf.fit(freq_term_matrix)
 
@@ -57,4 +67,3 @@ if __name__ == '__main__':
     # Print nicely
     X = pd.DataFrame(feat_vecs, columns=c.get_feature_names())
     print(X)
-
