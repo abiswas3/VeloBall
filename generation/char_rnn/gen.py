@@ -1,8 +1,11 @@
+"""Usage: gen.py <datafile> <maxlen>"""
+
 import tensorflow as tf
 from tensorflow.contrib import rnn
 import numpy as np
 import os, random, sys
 from IPython import embed
+import docopt
 
 BasicLSTMCell = tf.nn.rnn_cell.BasicLSTMCell
 
@@ -10,6 +13,7 @@ from chat import *
 
 class CharRNN:
     def __init__(self,
+                 datafile,
                  maxlen,
                  hidden_state_dim=512,
                  batch_size=100,
@@ -24,7 +28,7 @@ class CharRNN:
         self.checkpoint_dir = checkpoint_dir
         self.num_layers = num_layers
         self.dropout_keep_prob = dropout_keep_prob
-        self.chat = chat(sys.argv[1], self.maxlen)
+        self.chat = chat(datafile, self.maxlen)
         self.run()
 
     def build_model_multilstm(self):
@@ -136,4 +140,5 @@ class CharRNN:
         self.build_model_bigru()
         self.train_model()
 
-CharRNN(int(sys.argv[2]))
+args = docopt.docopt(__doc__)        
+CharRNN(args['<datafile>'], int(args['<maxlen>']))

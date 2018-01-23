@@ -10,7 +10,7 @@ class chat:
     def __init__(self, filename, maxlen):
         raw_data = []
         self.maxlen = maxlen
-        with open("data/"+filename,"rb") as f:
+        with open(filename,"rb") as f:
             s = f.read()
             while len(s) > 0:
                 #print(len(s))
