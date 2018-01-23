@@ -1,4 +1,6 @@
 import numpy as np
+import random
+
 BEGIN = 256
 END=257
 PAD=258
@@ -39,14 +41,16 @@ class chat:
         return "".join(s)
             
     def get_input(self, data):
-        tokenised = [BEGIN]+list(data[:self.maxlen-2])+[END]
+        #tokenised = [BEGIN]+list(data[:self.maxlen-2])+[END]
+        tokenised = list(data[:self.maxlen-2])+[END]
         padded = tokenised + [PAD]*(self.maxlen - len(tokenised))
         return len(tokenised),[[1 if i == x else 0 for i in range(DIM)] for x in padded]
 
     def get_output(self, data):
-        tokenised = list(data[:self.maxlen-1])+[END]
+        tokenised = list(data[1:self.maxlen-1])+[END]
         padded = tokenised + [PAD]*(self.maxlen - len(tokenised))
         return [[1 if i == x else 0 for i in range(DIM)] for x in padded]
 
-    def get_batch(self, batch_size, offset):
-        return self.data[offset:offset+batch_size],self.lengths[offset:offset+batch_size],self.outputs[offset:offset+batch_size]
+    def get_batch(self, batch_size):
+        indices = random.sample(list(range(len(self.data))),batch_size)
+        return [self.data[i] for i in indices],[self.lengths[i] for i in indices],[self.outputs[i] for i in indices]
