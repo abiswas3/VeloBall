@@ -1,4 +1,4 @@
 # Title to be defined
 
-  A mathematics podcast inspired by Gerain Thomas and Luke Rowe's
+  A mathematics podcast inspired by Geraint Thomas and Luke Rowe's
   Watts Occurring.
