@@ -1,0 +1,11 @@
+awscli
+scrapy
+pika
+pandas
+extruct
+lxml
+boto3
+validators
+fuzzywuzzy
+goose3
+python-Levenshtein
