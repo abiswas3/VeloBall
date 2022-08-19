@@ -29,6 +29,7 @@ class GrandTour(object):
         # print(pd.DataFrame(self.roster).T.sort_values(ascending=False, by='score'))
         self.final_score =  self.process_results()
         self.name_to_rank = {k: idx+1 for idx, k in enumerate(self.final_score.index.tolist())}
+        
         self.final_race_results, _  =  self.get_single_day_results(stage_number=21)
 
         self.final_score['index'] = [i+1 for i in range(len(self.final_score))]
@@ -91,7 +92,10 @@ class GrandTour(object):
         for stage_number in range(start, end+1):
             data_dict, stage_type = self.get_single_day_results(stage_number)
             self.get_stage_scores(data_dict, 'ITT' in stage_type)
-            print("stage {} winner: {}".format(stage_number, data_dict['Stage'].iloc[0]['name']))
+            # print("stage {} winners: {}\n{}\n{}\n".format(stage_number,
+            #                                     data_dict['Stage'].iloc[0]['name'],
+            #                                     data_dict['Stage'].iloc[1]['name'],
+            #                                     data_dict['Stage'].iloc[2]['name']))
         # # FINAL GC
         results = final_gc
         for idx, row in data_dict['GC'].iterrows():
@@ -229,11 +233,11 @@ class GrandTour(object):
     def get_points_for_my_team(self, team_lst, TOP):
 
         common = set(self.final_score.head(TOP).index).intersection(set(team_lst))
-        print("How many in the top total score {}?".format(TOP), len(common))
+        # print("How many in the top total score {}?".format(TOP), len(common))
         top_score = len(common)
         
         common = set(self.final_race_results['GC'].head(TOP).name).intersection(set(team_lst))
-        print("How many in the GC {}?".format(TOP), len(common))
+        # print("How many in the GC {}?".format(TOP), len(common))
         gc_top = len(common)
         
         temp = {}
@@ -250,5 +254,5 @@ class GrandTour(object):
         print("Total score", df['score'].sum())
         print("mean reciprocal rank  MRR", sum(mrr))
 
-        print(top_score, gc_top, df['score'].sum(), sum(mrr))
+        # print(top_score, gc_top, df['score'].sum(), sum(mrr))
         return top_score, gc_top, df['score'].sum(), sum(mrr)

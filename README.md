@@ -1,4 +1,3 @@
-# Title to be defined
+# TDF Fantasy Extractor
 
-  A mathematics podcast inspired by Geraint Thomas and Luke Rowe's
-  Watts Occurring.
+	Scraping pro cycling stats to crush Tom Vickery at VeloGames.

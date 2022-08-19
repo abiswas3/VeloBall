@@ -10,6 +10,8 @@ final_kom = final_points[:]
 assert len(final_points) == 10
 
 stage_results = [220, 180, 160, 140, 120, 110, 95, 80, 70, 60, 50, 40, 35, 30, 25, 20, 16, 12, 8, 4]
+
+
 assert len(stage_results) == 20
 gc_results = [30, 26, 22, 18, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
 assert len(gc_results) == 20

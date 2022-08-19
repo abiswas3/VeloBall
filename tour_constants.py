@@ -27,7 +27,7 @@ toms_team = [
 winning_teams = [
 
     [
-        "POGAČAR Tadej",
+        "POGAČAR Tadej", # T20
         "O'CONNOR Ben",
         "ALAPHILIPPE Julian",
         "CARAPAZ Richard",

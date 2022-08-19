@@ -18,7 +18,7 @@ if __name__ == '__main__':
                        base_path = './processed_web_data/{}/'.format(YEAR))
 
 
-        # print(gt.final_score.head(TOP)[['score', 'gc_pos']])
+        print(gt.final_score.head(TOP)[['score', 'gc_pos']])
         # df = pd.DataFrame(gt.roster_trajectory).T        
         # for rider in gt.final_score.head(TOP).index:
         #     print(rider)
