@@ -43,7 +43,7 @@ WEB_LINK = [
 
 ##################### SIMULATE A CRAWLER USING A WEB BROWSER #####################
 
-c = crawler.BaseHTMLRenderer()
+c = crawler.BaseHTMLRenderer()    
 for stage_number in range(1, 22):
     ######################################3
     base_name, url = WEB_LINK[GT]
@@ -52,13 +52,14 @@ for stage_number in range(1, 22):
     print(url)
     fname = '../saved_htmls/{}'.format(utils.get_hash(url))
     extractor = None
+
     c.get_main_page(url, fname, override=False)
     ######################################
     
     filepath = sys.argv[1] if len(sys.argv) > 1 else fname
     count = 0
-    extractor = parsers.DocumentExtractor()
 
+    extractor = parsers.DocumentExtractor()
     try:
         with open(fname) as fp:
             temp = json.load(fp)
@@ -88,14 +89,13 @@ for stage_number in range(1, 22):
         save_json['results'][d[index]] = df.to_dict()
 
 
-    try:
+
         pakainfodoc = Path('{}-stage-{}.json'.format(base_name, stage_number))
         pakainfodoc.touch(exist_ok=True)
         with open('{}-stage-{}.json'.format(base_name, stage_number), 'w')  as fp:
-            json.dump(save_json, fp)
-        
+            json.dump(save_json, fp)        
         print("+++++++++++++++++ {} DONE ++++++++++++++++++++++++\n".format(stage_type))
-    except:
-        c.quit()
+
+
 ###################################################################################
-c.quit()
+

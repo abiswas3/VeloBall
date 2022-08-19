@@ -6,3 +6,4 @@ validators
 fuzzywuzzy
 python-Levenshtein
 tabulate
+webdriver_manager
