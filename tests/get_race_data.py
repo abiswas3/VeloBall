@@ -1,7 +1,6 @@
 import json
 import sys
-sys.path.append('../')
-# sys.path.append('/Users/aritrb/RelatedNews/src/Starman/src')
+sys.path.append('../PeterParker/')
 import os
 
 import glob
@@ -12,6 +11,7 @@ from collections import Counter, defaultdict
 
 import pandas as pd
 import numpy as np
+from pathlib import Path
 
 import crawler
 import parsers
@@ -43,6 +43,7 @@ WEB_LINK = [
 
 ##################### SIMULATE A CRAWLER USING A WEB BROWSER #####################
 
+c = crawler.BaseHTMLRenderer()
 for stage_number in range(1, 22):
     ######################################3
     base_name, url = WEB_LINK[GT]
@@ -51,26 +52,30 @@ for stage_number in range(1, 22):
     print(url)
     fname = '../saved_htmls/{}'.format(utils.get_hash(url))
     extractor = None
-    c = crawler.HomePageHTMLRenderer(url, fname, override=False)
+    c.get_main_page(url, fname, override=False)
     ######################################
     
     filepath = sys.argv[1] if len(sys.argv) > 1 else fname
     count = 0
-    extractor = parsers.NewsExtractor()
-    with open(fname) as fp:
-        temp = json.load(fp)
-        url = temp['url']
-        page = temp['page']
-        meta_data = {}
-        nlp = None
+    extractor = parsers.DocumentExtractor()
+
+    try:
+        with open(fname) as fp:
+            temp = json.load(fp)
+            url = temp['url']
+            page = temp['page']
+            meta_data = {}
+            nlp = None
+    except:
+        continue
 
     get_table_text = lambda x: [x  for x in x.itertext()]
     extractor.process_page(url, page, schema_org_check=True, urls_crawled=[])
     print()
-    # [1]/div[1]/div[2]
+    
     print([x for x in extractor.tree.xpath("//div[@class='sub']")[0].itertext()])
     stage_type = [x for x in extractor.tree.xpath("//div[@class='sub']")[0].itertext()][2]
-    # stage_type = "UNK"
+    
     
     print("\nSTAGE TYPE", stage_type)
     save_json = {'type': stage_type, 'results': {}}
@@ -81,9 +86,16 @@ for stage_number in range(1, 22):
     for index in d:
         df = pd.DataFrame([get_table_text(x) for x in tables[index].xpath("tr")])
         save_json['results'][d[index]] = df.to_dict()
-                             
-    with open('{}-stage-{}.json'.format(base_name, stage_number), 'w')  as fp:
-        json.dump(save_json, fp)
+
+
+    try:
+        pakainfodoc = Path('{}-stage-{}.json'.format(base_name, stage_number))
+        pakainfodoc.touch(exist_ok=True)
+        with open('{}-stage-{}.json'.format(base_name, stage_number), 'w')  as fp:
+            json.dump(save_json, fp)
         
-    print("+++++++++++++++++ {} DONE ++++++++++++++++++++++++\n".format(stage_type))
+        print("+++++++++++++++++ {} DONE ++++++++++++++++++++++++\n".format(stage_type))
+    except:
+        c.quit()
 ###################################################################################
+c.quit()
