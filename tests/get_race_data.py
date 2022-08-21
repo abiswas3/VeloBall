@@ -88,8 +88,6 @@ for stage_number in range(1, 22):
         df = pd.DataFrame([get_table_text(x) for x in tables[index].xpath("tr")])
         save_json['results'][d[index]] = df.to_dict()
 
-
-
         pakainfodoc = Path('{}-stage-{}.json'.format(base_name, stage_number))
         pakainfodoc.touch(exist_ok=True)
         with open('{}-stage-{}.json'.format(base_name, stage_number), 'w')  as fp:

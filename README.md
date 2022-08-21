@@ -1,3 +1,6 @@
-# TDF Fantasy Extractor
+# Velo Games
 
-	Scraping pro cycling stats to crush Tom Vickery at VeloGames.
+Little Python package to download cycling stats and automate velogames
+team selection. Work in progress
+
+	
