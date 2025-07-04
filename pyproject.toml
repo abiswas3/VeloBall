@@ -1,0 +1,29 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "velo-scraper"
+dynamic = ["version"]
+description = "CLI scraper for ProCyclingStats stage results"
+readme = "README.md"
+requires-python = ">=3.8"
+license = "MIT"
+authors = [{ name = "A Random Walker", email = "software@randomwalks.xyz" }]
+dependencies = [
+  "requests",
+  "beautifulsoup4",
+  "pandas"
+]
+
+[project.scripts]
+pcs-scraper = "velo_scraper.cli:main"
+
+[project.urls]
+Source = "https://github.com/Ari/velo-scraper"
+Issues = "https://github.com/Ari/velo-scraper/issues"
+Documentation = "https://github.com/Ari/velo-scraper#readme"
+
+[tool.hatch.version]
+path = "src/velo_scraper/__about__.py"
+
