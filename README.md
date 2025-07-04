@@ -1,6 +1,6 @@
 # velo_scraper
 
-![CI](https://github.com/abiswas3/VeloBall/actions/workflows/ci.yml/badge.svg?branch=main)
+[![Python package](https://github.com/abiswas3/VeloBall/actions/workflows/python-package.yml/badge.svg)](https://github.com/abiswas3/VeloBall/actions/workflows/python-package.yml)
 
 <!-- Removed PyPI badges since you're not using PyPI now -->
 
