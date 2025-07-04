@@ -1,6 +1,7 @@
 # velo_scraper
 
-[![GitHub Workflow](https://img.shields.io/github/actions/workflow/status/yourusername/velo_scraper/python-package.yml?branch=main)](https://github.com/yourusername/velo_scraper/actions)
+![CI](https://github.com/abiswas3/VeloBall/actions/workflows/ci.yml/badge.svg?branch=main)
+
 <!-- Removed PyPI badges since you're not using PyPI now -->
 
 -----
