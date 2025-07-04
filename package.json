@@ -1,0 +1,17 @@
+{
+  "name": "velo-scraper",
+  "version": "1.0.0",
+  "description": "Velogames rider scraper and PCS stage tabs scraper",
+  "main": "index.js",
+  "scripts": {
+    "scrape-riders": "node scripts/rider_list.js https://www.velogames.com/velogame/2025/riders.php",
+    "scrape-pcs": "node scripts/scrape_pcs.js"
+  },
+  "dependencies": {
+    "cheerio": "^1.1.0",
+    "fs-extra": "^11.3.0",
+    "minimist": "^1.2.8",
+    "node-html-parser": "^7.0.1",
+    "puppeteer": "^23.11.1"
+  }
+}
